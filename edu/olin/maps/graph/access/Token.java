@@ -7,34 +7,40 @@ import java.util.Map;
  * Wheee!
  */
 
-public class AccessToken {
+public class Token {
     
     private int id;
+    private String nickname;
     
-    private static final Map<Integer,AccessToken> tokens = new HashMap();
+    private static final Map<Integer, Token> tokens = new HashMap();
     
-    public static AccessToken getAccessToken(int id){
+    public static Token getAccessToken(int id, String nickname){
         if(tokens.containsKey(id)){
             return tokens.get(id);
             }
-        AccessToken t = new AccessToken(id);
+        Token t = new Token(id,nickname);
         tokens.put(id,t);
         return t;
         }
     
-    private AccessToken(int id){
+    private Token(int id, String nickname){
         this.id = id;
+        this.nickname = nickname;
         }
     
     public int getID(){
         return id;
         }
     
+    public String getNickname(){
+        return nickname;
+        }
+    
     public boolean equals(Object other){
-        if(other==null || !(other instanceof AccessToken)){
+        if(other==null || !(other instanceof Token)){
             return false;
             }
-        return ((AccessToken) other).id == this.id;
+        return ((Token) other).id == this.id;
         }
     
     }
