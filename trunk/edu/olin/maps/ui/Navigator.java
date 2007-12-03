@@ -29,7 +29,7 @@ public class Navigator extends javax.swing.JFrame {
 		int n = 25;
 		Navigator nav = new Navigator();
 		SpaceGraph g = RandomGraphGenerator.generateRandomSpaceGraph(n, 3 * n);
-		System.out.println("Graph: " + g);
+		//System.out.println("Graph: " + g);
 		nav.setGraph(g);
 		nav.setVisible(true);
 	}

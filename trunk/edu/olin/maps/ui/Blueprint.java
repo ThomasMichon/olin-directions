@@ -34,14 +34,14 @@ import java.awt.geom.Rectangle2D;
  */
 public class Blueprint extends javax.swing.JPanel {
 	
-	private double scale = 10.0D;
+	private double scale = 5.0D;
 	private Point2D center = new Point2D.Double();
 	
 	private boolean drawGridEnabled = true;
 	
 	private AffineTransform currentTransform = new AffineTransform();
 	
-	private Point2D gridResolution = new Point2D.Double(1.0, 1.0);
+	private Point2D gridResolution = new Point2D.Double(10.0, 10.0);
 	
 	private SpaceGraph graph = null;
 	
@@ -192,24 +192,31 @@ public class Blueprint extends javax.swing.JPanel {
 		STROKE_BOX_RECT = new BasicStroke(1.0e-3F);
 	
 	public void paintComponent(Graphics g) {
-		Graphics2D gfx = (Graphics2D) g.create();
+		Graphics2D screen = (Graphics2D) g.create();
+		Graphics2D world = (Graphics2D) g.create();
 		
 		rebuildTransform();
-		gfx.transform(currentTransform);
+		world.transform(currentTransform);
 		
-		g.setColor(Color.white);
-		g.fillRect(0, 0, getWidth(), getHeight());
+		screen.setColor(Color.white);
+		screen.fillRect(0, 0, getWidth(), getHeight());
 		
-		this.drawGrid(gfx);
+		this.drawGrid(screen, world);
 		
-		this.drawGraph(gfx);
+		this.drawGraph(screen, world);
 	}
 	
-	private void drawGraph(Graphics2D gfx) {
+	private void drawGraph(Graphics2D screen, Graphics2D world) {
 		if (graph == null) return;
 		
+		Line2D line;
 		for (SpaceEdge edge : graph.getEdges()) {
-			gfx.draw(new Line2D.Double(convertVertex(edge.getOrigin()), convertVertex(edge.getDest())));
+			line = new Line2D.Double(convertVertex(edge.getOrigin()), convertVertex(edge.getDest()));
+			if (! world.getClipBounds().intersectsLine(line)) continue;
+			System.out.println("Line: " + line.getP1() + ", " + line.getP2());
+			screen.setColor(Color.BLACK);
+			screen.setStroke(new BasicStroke(0.1F));
+			screen.draw(currentTransform.createTransformedShape(line));
 		}
 	}
 	
@@ -221,30 +228,30 @@ public class Blueprint extends javax.swing.JPanel {
 		return Math.floor(v / res) * res;
 	}
 	
-	private void drawGrid(Graphics2D gfx) {
-		Rectangle2D rect = gfx.getClipBounds();
+	private void drawGrid(Graphics2D screen, Graphics2D world) {
+		Rectangle2D rect = world.getClipBounds();
 		
-		gfx.setStroke(STROKE_GRID);
-		gfx.setColor(COLOR_GRID);
+		screen.setStroke(STROKE_GRID);
+		screen.setColor(COLOR_GRID);
 		
 		Line2D line;
 		if (isDrawGridEnabled()) {
 			for (double x = roundToGrid(rect.getX(), gridResolution.getX()); x < rect.getX() + rect.getWidth(); x += gridResolution.getX()) {
 				line = new Line2D.Double(x, rect.getY(), x, rect.getY() + rect.getHeight());
-				gfx.draw(line);
+				screen.draw(currentTransform.createTransformedShape(line));
 			}
 			for (double y = roundToGrid(rect.getY(), gridResolution.getY()); y < rect.getY() + rect.getHeight(); y += gridResolution.getY()) {
 				line = new Line2D.Double(rect.getX(), y, rect.getX() + rect.getWidth(), y);
-				gfx.draw(line);
+				screen.draw(currentTransform.createTransformedShape(line));
 			}
 		}
 
-		gfx.setColor(COLOR_GRID_AXIS);
+		screen.setColor(COLOR_GRID_AXIS);
 
 		line = new Line2D.Double(rect.getX(), 0, rect.getX() + rect.getWidth(), 0);
-		gfx.draw(line);
+		screen.draw(currentTransform.createTransformedShape(line));
 		line = new Line2D.Double(0, rect.getY(), 0, rect.getY() + rect.getHeight());
-		gfx.draw(line);
+		screen.draw(currentTransform.createTransformedShape(line));
 	}
 	
 	/** This method is called from within the constructor to
