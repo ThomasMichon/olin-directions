@@ -10,15 +10,20 @@ import edu.olin.maps.graph.*;
 public class SpaceVertex extends Vertex {
     
     private Point3D location = null;
+    private String nickname = null;
 
     /**
      * Creates a new SpaceVertex with the given attributes
      * @param location A Point3D describing where this vertex exists in 3-space
      */
     public SpaceVertex(Point3D location){
+        this(null,location);
+        }
+    public SpaceVertex(String nickname, Point3D location){
         super();
         if(location==null){ throw new IllegalArgumentException("Location must be not null"); }
         this.location = location;
+        this.nickname = nickname;
         }
     
     /**
@@ -32,7 +37,8 @@ public class SpaceVertex extends Vertex {
      * @return The String: <code>ClassName(id)</code>
      */
     public String toString(){
-        return getClass().getSimpleName()+"("+getID()+")";
+        String nname = nickname==null ? "" : (nickname+",");
+        return getClass().getSimpleName()+"("+nname+getID()+")";
         }
 
     }
