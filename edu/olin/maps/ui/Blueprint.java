@@ -79,7 +79,7 @@ public class Blueprint extends javax.swing.JPanel {
 	private MouseListener mouseListener = new MouseAdapter() {
 		public void mousePressed(MouseEvent e) {
 			switch (e.getButton()) {
-				case 2:
+				case 1:
 					System.out.println("Dragging!");
 					dragControl = convertToWorld(e.getPoint());
 					System.out.println("Control: " + dragControl);
@@ -89,7 +89,7 @@ public class Blueprint extends javax.swing.JPanel {
 		
 		public void mouseReleased(MouseEvent e) {
 			switch(e.getButton()) {
-				case 2:
+				case 1:
 					dragControl = null;
 					break;
 			}
