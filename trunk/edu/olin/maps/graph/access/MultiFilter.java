@@ -18,6 +18,9 @@ public class MultiFilter implements CredentialFilter {
         }
     
     public boolean accept(Credentials c) {
+        if(c==null||filters.size()==0){ //no credentials provided
+            return filters.size()==0; //if there are filters required, return false, otherwise return true
+            }
         for(CredentialFilter f: filters){
             boolean accepts = f.accept(c);
             if( accepts^isAnd ){
