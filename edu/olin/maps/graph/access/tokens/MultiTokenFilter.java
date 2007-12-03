@@ -14,11 +14,14 @@ public class MultiTokenFilter implements CredentialFilter {
     private boolean isAnd = false;
     
     public MultiTokenFilter(Set<Token> tokens, boolean isAnd){
-        this.tokens.addAll(tokens);
+        if(tokens!=null){ this.tokens.addAll(tokens); }
         this.isAnd = isAnd;
         }
     
     public boolean accept(Credentials c) {
+        if(c==null||tokens.size()==0){ //no credentials provided
+            return tokens.size()==0; //if there are tokens required, return false, otherwise return true
+            }
         for(Token t: tokens){
             boolean has = c.hasToken(t);
             if( has^isAnd ){ //clever trick
