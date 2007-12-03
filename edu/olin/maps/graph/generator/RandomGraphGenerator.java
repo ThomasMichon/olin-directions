@@ -10,7 +10,8 @@ public class RandomGraphGenerator {
     
     private static Point3D randomPoint(int range){
         int x = Random.r.nextInt(range);
-        return new Point3D(x,0,0);
+        int y = Random.r.nextInt(range);
+        return new Point3D(x,y,0);
         }
     
     private static SpaceEdge randomEdge(Set<SpaceVertex> v){
