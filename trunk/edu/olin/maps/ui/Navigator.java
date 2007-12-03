@@ -6,6 +6,8 @@
 
 package edu.olin.maps.ui;
 
+import edu.olin.maps.graph.generator.RandomGraphGenerator;
+import edu.olin.maps.graph.weighted.space.SpaceGraph;
 import javax.swing.UIManager;
 
 /**
@@ -19,6 +21,19 @@ public class Navigator extends javax.swing.JFrame {
 		initComponents();
 	}
 	
+	private void setGraph(SpaceGraph g) {
+		this.blueprint.setGraph(g);
+	}
+	
+	private static void runNavigator() {
+		int n = 25;
+		Navigator nav = new Navigator();
+		SpaceGraph g = RandomGraphGenerator.generateRandomSpaceGraph(n, 3 * n);
+		System.out.println("Graph: " + g);
+		nav.setGraph(g);
+		nav.setVisible(true);
+	}
+	
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -26,11 +41,10 @@ public class Navigator extends javax.swing.JFrame {
 	 */
     // <editor-fold defaultstate="collapsed" desc=" Generated Code ">//GEN-BEGIN:initComponents
     private void initComponents() {
-        blueprint1 = new edu.olin.maps.ui.Blueprint();
+        blueprint = new edu.olin.maps.ui.Blueprint();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
-        getContentPane().add(blueprint1, java.awt.BorderLayout.CENTER);
+        getContentPane().add(blueprint, java.awt.BorderLayout.CENTER);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -47,13 +61,13 @@ public class Navigator extends javax.swing.JFrame {
 		}
 		java.awt.EventQueue.invokeLater(new Runnable() {
 			public void run() {
-				new Navigator().setVisible(true);
+				runNavigator();
 			}
 		});
 	}
 	
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private edu.olin.maps.ui.Blueprint blueprint1;
+    private edu.olin.maps.ui.Blueprint blueprint;
     // End of variables declaration//GEN-END:variables
 	
 }
