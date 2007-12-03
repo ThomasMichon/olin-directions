@@ -12,8 +12,8 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 
 /**
- *
- * @author tmichon
+ * 
+ * @author Thomas Michon
  */
 public class NodeArt {
 	
