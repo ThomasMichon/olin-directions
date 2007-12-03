@@ -6,6 +6,9 @@
 
 package edu.olin.maps.ui;
 
+import edu.olin.maps.graph.weighted.space.SpaceEdge;
+import edu.olin.maps.graph.weighted.space.SpaceGraph;
+import edu.olin.maps.graph.weighted.space.SpaceVertex;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -24,7 +27,6 @@ import java.awt.geom.Line2D;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import javax.swing.JOptionPane;
 
 /**
  *
@@ -41,6 +43,8 @@ public class Blueprint extends javax.swing.JPanel {
 	
 	private Point2D gridResolution = new Point2D.Double(1.0, 1.0);
 	
+	private SpaceGraph graph = null;
+	
 	private KeyListener keyListener = new KeyAdapter() {
 		public void keyPressed(KeyEvent e) {
 			switch (e.getKeyCode()) {
@@ -56,12 +60,20 @@ public class Blueprint extends javax.swing.JPanel {
 	
 	private MouseListener mouseListener = new MouseAdapter() {
 		public void mouseClicked(MouseEvent e) {
+			/*try {
+				currentTransform.inverseTransform(e.getPoint(), center);
+			} catch (NoninvertibleTransformException ex) {
+				ex.printStackTrace();
+			}
+			rebuildTransform();
+			repaint();*/
+			alignPoint(e.getPoint(), new Point2D.Double(0, 0));
 		}
 	};
 	
 	private MouseWheelListener mouseWheelListener = new MouseWheelListener() {
 		public void mouseWheelMoved(MouseWheelEvent e) {
-			if (e.getUnitsToScroll() > 0) setScale(getScale() * 1.2);
+			if (e.getUnitsToScroll() > 0) setScale(getScale() * 1.2, e.getPoint());
 			else setScale(getScale() / 1.2, e.getPoint());
 		}
 	};
@@ -77,8 +89,15 @@ public class Blueprint extends javax.swing.JPanel {
 		this.addMouseListener(mouseListener);
 		this.addKeyListener(keyListener);
 		this.addMouseWheelListener(mouseWheelListener);
-		
-		//this.is
+	}
+	
+	public SpaceGraph getGraph() {
+		return this.graph;
+	}
+	
+	public void setGraph(SpaceGraph graph) {
+		this.graph = graph;
+		repaint();
 	}
 	
 	public boolean isDrawGridEnabled() {
@@ -116,17 +135,30 @@ public class Blueprint extends javax.swing.JPanel {
 		repaint();
 	}
 	
-	public void setScale(double scale, Point2D focus) {
-		Point2D screen = new Point2D.Double();
-		currentTransform.transform(focus, screen);
-		this.scale = scale;
-		rebuildTransform();
+	public void setScale(double scale, Point2D screen) {
+		Point2D old = new Point2D.Double();
 		try {
-			currentTransform.inverseTransform(screen, screen);
+			currentTransform.inverseTransform(screen, old);
 		} catch (NoninvertibleTransformException ex) {
 			ex.printStackTrace();
 		}
-		this.center = new Point2D.Double(screen.getX() - focus.getX(), screen.getY() - focus.getY());
+		//System.out.println("Old: " + old);
+		this.scale = scale;
+		rebuildTransform();
+		alignPoint(screen, old);
+	}
+	
+	private void alignPoint(Point2D screen, Point2D world) {
+		Point2D current = new Point2D.Double();
+		try {
+			currentTransform.inverseTransform(screen, current);
+		} catch (NoninvertibleTransformException ex) {
+			ex.printStackTrace();
+		}
+		/*System.out.println("Align:");
+		System.out.println("	Current: " + current);
+		System.out.println("	World: " + world);*/
+		this.center = new Point2D.Double(center.getX() + world.getX() - current.getX(), center.getY() + world.getY() - current.getY());
 		rebuildTransform();
 		repaint();
 	}
@@ -135,6 +167,7 @@ public class Blueprint extends javax.swing.JPanel {
 		AffineTransform transform = new AffineTransform();
 		transform.translate(getWidth() / 2, getHeight() / 2);
 		transform.scale(scale, -scale);
+		//transform.shear(-0.5, 0.5);
 		transform.translate(-center.getX(), -center.getY());
 		currentTransform = transform;
 	}
@@ -168,6 +201,24 @@ public class Blueprint extends javax.swing.JPanel {
 		g.fillRect(0, 0, getWidth(), getHeight());
 		
 		this.drawGrid(gfx);
+		
+		this.drawGraph(gfx);
+	}
+	
+	private void drawGraph(Graphics2D gfx) {
+		if (graph == null) return;
+		
+		for (SpaceEdge edge : graph.getEdges()) {
+			gfx.draw(new Line2D.Double(convertVertex(edge.getOrigin()), convertVertex(edge.getDest())));
+		}
+	}
+	
+	private Point2D convertVertex(SpaceVertex vertex) {
+		return new Point2D.Double(vertex.getLocation().getX(), vertex.getLocation().getY());
+	}
+	
+	private double roundToGrid(double v, double res) {
+		return Math.floor(v / res) * res;
 	}
 	
 	private void drawGrid(Graphics2D gfx) {
@@ -178,11 +229,11 @@ public class Blueprint extends javax.swing.JPanel {
 		
 		Line2D line;
 		if (isDrawGridEnabled()) {
-			for (double x = 0; x < rect.getX() + rect.getWidth(); x += gridResolution.getX()) {
+			for (double x = roundToGrid(rect.getX(), gridResolution.getX()); x < rect.getX() + rect.getWidth(); x += gridResolution.getX()) {
 				line = new Line2D.Double(x, rect.getY(), x, rect.getY() + rect.getHeight());
 				gfx.draw(line);
 			}
-			for (double y = 0; y < rect.getY() + rect.getHeight(); y += gridResolution.getY()) {
+			for (double y = roundToGrid(rect.getY(), gridResolution.getY()); y < rect.getY() + rect.getHeight(); y += gridResolution.getY()) {
 				line = new Line2D.Double(rect.getX(), y, rect.getX() + rect.getWidth(), y);
 				gfx.draw(line);
 			}
