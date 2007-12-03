@@ -11,7 +11,17 @@ import edu.olin.maps.graph.weighted.space.SpaceVertex;
  * @author jstanton
  */
 public class Stairs extends RestrictedEdge {
- 
+
+    /**
+     * Makes an Stairs with no access restrictions
+     */
+    public Stairs(SpaceVertex origin, SpaceVertex dest){
+        this(origin,dest,null);
+        }
+    
+    /**
+     * Makes an Stairs with some access restrictions
+     */
     public Stairs(SpaceVertex origin, SpaceVertex dest, CredentialFilter filter){
         super(origin,dest,filter);
         }
