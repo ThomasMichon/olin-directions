@@ -1,4 +1,4 @@
-package edu.olin.maps.graph.access;
+package edu.olin.maps.graph.access.tokens;
 
 import java.util.HashMap;
 import java.util.Map;

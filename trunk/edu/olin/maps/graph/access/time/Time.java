@@ -1,5 +1,9 @@
 package edu.olin.maps.graph.access.time;
 
+/**
+ * A simple Time consisting of a time of day and a day of week (0-based, 0=Sunday)
+ * @author jstanton
+ */
 public class Time implements Comparable {
     
     private int dow = 0; //0-based day of week, 0 is Sunday => 6 is Saturday
