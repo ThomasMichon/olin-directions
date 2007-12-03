@@ -20,6 +20,8 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
@@ -45,6 +47,9 @@ public class Blueprint extends javax.swing.JPanel {
 	
 	private SpaceGraph graph = null;
 	
+	private boolean panning = false;
+	private Point2D dragControl = null;
+	
 	private KeyListener keyListener = new KeyAdapter() {
 		public void keyPressed(KeyEvent e) {
 			switch (e.getKeyCode()) {
@@ -58,7 +63,38 @@ public class Blueprint extends javax.swing.JPanel {
 		}
 	};
 	
+	private MouseMotionListener mouseMotionListener = new MouseMotionAdapter() {
+		public void mouseMoved(MouseEvent e) {
+			
+		}
+		
+		public void mouseDragged(MouseEvent e) {
+			if (dragControl != null) {
+				alignPoint(e.getPoint(), dragControl);
+				repaint();
+			}
+		}
+	};
+	
 	private MouseListener mouseListener = new MouseAdapter() {
+		public void mousePressed(MouseEvent e) {
+			switch (e.getButton()) {
+				case 2:
+					System.out.println("Dragging!");
+					dragControl = convertToWorld(e.getPoint());
+					System.out.println("Control: " + dragControl);
+					break;
+			}
+		}
+		
+		public void mouseReleased(MouseEvent e) {
+			switch(e.getButton()) {
+				case 2:
+					dragControl = null;
+					break;
+			}
+		}
+		
 		public void mouseClicked(MouseEvent e) {
 			/*try {
 				currentTransform.inverseTransform(e.getPoint(), center);
@@ -67,7 +103,7 @@ public class Blueprint extends javax.swing.JPanel {
 			}
 			rebuildTransform();
 			repaint();*/
-			alignPoint(e.getPoint(), new Point2D.Double(0, 0));
+			//alignPoint(e.getPoint(), new Point2D.Double(0, 0));
 		}
 	};
 	
@@ -87,6 +123,7 @@ public class Blueprint extends javax.swing.JPanel {
 		this.getInputMap().clear();
 		
 		this.addMouseListener(mouseListener);
+		this.addMouseMotionListener(mouseMotionListener);
 		this.addKeyListener(keyListener);
 		this.addMouseWheelListener(mouseWheelListener);
 	}
@@ -146,6 +183,18 @@ public class Blueprint extends javax.swing.JPanel {
 		this.scale = scale;
 		rebuildTransform();
 		alignPoint(screen, old);
+		repaint();
+	}
+	
+	private Point2D convertToWorld(Point2D screen) {
+		Point2D point = new Point2D.Double();
+		try {
+			currentTransform.inverseTransform(screen, point);
+		} catch (NoninvertibleTransformException ex) {
+			ex.printStackTrace();
+			return null;
+		}
+		return point;
 	}
 	
 	private void alignPoint(Point2D screen, Point2D world) {
@@ -160,7 +209,6 @@ public class Blueprint extends javax.swing.JPanel {
 		System.out.println("	World: " + world);*/
 		this.center = new Point2D.Double(center.getX() + world.getX() - current.getX(), center.getY() + world.getY() - current.getY());
 		rebuildTransform();
-		repaint();
 	}
 	
 	private void rebuildTransform() {
@@ -213,7 +261,6 @@ public class Blueprint extends javax.swing.JPanel {
 		for (SpaceEdge edge : graph.getEdges()) {
 			line = new Line2D.Double(convertVertex(edge.getOrigin()), convertVertex(edge.getDest()));
 			if (! world.getClipBounds().intersectsLine(line)) continue;
-			System.out.println("Line: " + line.getP1() + ", " + line.getP2());
 			screen.setColor(Color.BLACK);
 			screen.setStroke(new BasicStroke(0.1F));
 			screen.draw(currentTransform.createTransformedShape(line));
