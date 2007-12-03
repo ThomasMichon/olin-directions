@@ -11,6 +11,16 @@ import edu.olin.maps.graph.weighted.space.SpaceVertex;
  */
 public class Elevator extends RestrictedEdge {
  
+    /**
+     * Makes an Elevator with no access restrictions
+     */
+    public Elevator(SpaceVertex origin, SpaceVertex dest){
+        this(origin,dest,null);
+        }
+    
+    /**
+     * Makes an Elevator with some access restrictions
+     */
     public Elevator(SpaceVertex origin, SpaceVertex dest, CredentialFilter filter){
         super(origin,dest,filter);
         }

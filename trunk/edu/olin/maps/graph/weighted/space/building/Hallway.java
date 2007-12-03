@@ -7,12 +7,13 @@ import edu.olin.maps.graph.weighted.space.SpaceVertex;
 /**
  * An Edge which represents a Hallway.
  * Hallways are chainable with other Hallways
+ * You cannot restrict access within a hallway, as it is just an open room
  * @author jstanton
  */
 public class Hallway extends RestrictedEdge {
  
-    public Hallway(SpaceVertex origin, SpaceVertex dest, CredentialFilter filter){
-        super(origin,dest,filter);
+    public Hallway(SpaceVertex origin, SpaceVertex dest){
+        super(origin,dest,null);
         }
     
     /*
