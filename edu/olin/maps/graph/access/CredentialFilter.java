@@ -10,6 +10,6 @@ public interface CredentialFilter {
      * @param c The Credentials in question
      * @return true if the user should be accepted; false if the user should be rejected
      */
-    public boolean allowPassage(Credentials c);
+    public boolean accept(Credentials c);
     
     }

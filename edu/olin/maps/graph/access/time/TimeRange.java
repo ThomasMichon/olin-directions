@@ -2,6 +2,8 @@ package edu.olin.maps.graph.access.time;
 
 /**
  * Represents a simple range of times
+ * Does not work for wraparound times (SAT PM to SUN AM for example)
+ * @author jstanton
  */
 public class TimeRange {
     
@@ -14,7 +16,7 @@ public class TimeRange {
         }
     
     public boolean contains(Time t){
-        
+        if(t==null){ return false; }
         return t.compareTo(start)>=0 && t.compareTo(end)<=0;
         }
     

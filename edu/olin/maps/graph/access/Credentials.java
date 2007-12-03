@@ -1,6 +1,7 @@
 package edu.olin.maps.graph.access;
 
 import edu.olin.maps.graph.access.time.Time;
+import edu.olin.maps.graph.access.tokens.Token;
 import java.util.HashSet;
 import java.util.Set;
 
