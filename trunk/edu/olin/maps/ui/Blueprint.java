@@ -6,12 +6,12 @@
 
 package edu.olin.maps.ui;
 
-import edu.olin.maps.graph.Vertex;
 import edu.olin.maps.graph.weighted.space.SpaceEdge;
 import edu.olin.maps.graph.weighted.space.SpaceGraph;
 import edu.olin.maps.graph.weighted.space.SpaceVertex;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -90,6 +90,8 @@ public class Blueprint extends javax.swing.JPanel {
 	
 	private MouseListener mouseListener = new MouseAdapter() {
 		public void mousePressed(MouseEvent e) {
+			Point2D mouseWorld = convertToWorld(e.getPoint());
+			closestVertex = getClosestVertex(mouseWorld);
 			switch (e.getButton()) {
 				case 1:
 					focusVertices.add(closestVertex);
@@ -104,6 +106,8 @@ public class Blueprint extends javax.swing.JPanel {
 		}
 		
 		public void mouseReleased(MouseEvent e) {
+			Point2D mouseWorld = convertToWorld(e.getPoint());
+			closestVertex = getClosestVertex(mouseWorld);
 			switch(e.getButton()) {
 				case 1:
 					focusVertices.clear();
@@ -249,19 +253,23 @@ public class Blueprint extends javax.swing.JPanel {
 		currentTransform = transform;
 	}
 	
-	private SpaceVertex getClosestVertex(Point2D world) {
+	private SpaceVertex getClosestVertex(Point2D world, double maximum) {
 		double lowest = Double.POSITIVE_INFINITY;
 		SpaceVertex winner = null;
 		
 		for (SpaceVertex vertex : graph.getVertices()) {
 			double distance = world.distance(convertVertex(vertex));
-			if (distance < lowest) {
+			if (distance < lowest && distance <= maximum) {
 				winner = vertex;
 				lowest = distance;
 			}
 		}
 		
 		return winner;
+	}
+	
+	private SpaceVertex getClosestVertex(Point2D world) {
+		return getClosestVertex(world, Double.POSITIVE_INFINITY);
 	}
 	
 	private Point2D convertVertex(SpaceVertex vertex) {
@@ -314,10 +322,12 @@ public class Blueprint extends javax.swing.JPanel {
 		
 		Line2D line;
 		for (SpaceEdge edge : graph.getEdges()) {
+			Point2D origin = convertVertex(edge.getOrigin()), dest = convertVertex(edge.getDest());
 			line = new Line2D.Double(convertVertex(edge.getOrigin()), convertVertex(edge.getDest()));
 			if (! world.getClipBounds().intersectsLine(line)) continue;
-			screen.setColor(Color.BLACK);
-			screen.setStroke(new BasicStroke(0.1F));
+			screen.setPaint(new GradientPaint(convertToScreen(origin), Color.RED, convertToScreen(dest), Color.ORANGE));
+			//screen.setColor(Color.BLACK);
+			screen.setStroke(new BasicStroke(1F));
 			screen.draw(currentTransform.createTransformedShape(line));
 		}
 		

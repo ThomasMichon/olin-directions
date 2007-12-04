@@ -15,13 +15,13 @@ import java.awt.geom.Point2D;
  * 
  * @author Thomas Michon
  */
-public class NodeArt {
+public class VertexArt {
 	
 	private Point2D position = new Point2D.Double();
 	private double radius = 0.1D;
 	
 	/** Creates a new instance of NodeArt */
-	public NodeArt() {
+	public VertexArt() {
 	}
 	
 	public Point2D getPosition() {
