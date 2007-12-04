@@ -15,6 +15,7 @@ import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -308,6 +309,13 @@ public class Blueprint extends javax.swing.JPanel {
 		
 		rebuildTransform();
 		world.transform(currentTransform);
+		
+		Shape clip = new Rectangle2D.Double(0, 0, getWidth(), getHeight());
+		try {
+			world.setClip(currentTransform.createInverse().createTransformedShape(clip));
+		} catch (NoninvertibleTransformException ex) {
+			ex.printStackTrace();
+		}
 		
 		screen.setColor(Color.white);
 		screen.fillRect(0, 0, getWidth(), getHeight());
