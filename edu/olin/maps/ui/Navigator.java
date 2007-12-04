@@ -44,6 +44,7 @@ public class Navigator extends javax.swing.JFrame {
         blueprint = new edu.olin.maps.ui.Blueprint();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Olin Navigator");
         getContentPane().add(blueprint, java.awt.BorderLayout.CENTER);
 
         pack();
@@ -53,6 +54,8 @@ public class Navigator extends javax.swing.JFrame {
 	 * @param args the command line arguments
 	 */
 	public static void main(String args[]) {
+		//System.setProperty("sun.java2d.opengl", "true");
+		//System.setProperty("sun.java2d.noddraw", "true");
 		java.awt.Toolkit.getDefaultToolkit().setDynamicLayout(true);
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
