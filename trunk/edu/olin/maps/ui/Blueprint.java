@@ -6,6 +6,7 @@
 
 package edu.olin.maps.ui;
 
+import edu.olin.maps.graph.Vertex;
 import edu.olin.maps.graph.weighted.space.SpaceEdge;
 import edu.olin.maps.graph.weighted.space.SpaceGraph;
 import edu.olin.maps.graph.weighted.space.SpaceVertex;
@@ -13,6 +14,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -25,10 +27,13 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
@@ -50,6 +55,9 @@ public class Blueprint extends javax.swing.JPanel {
 	private boolean panning = false;
 	private Point2D dragControl = null;
 	
+	SpaceVertex closestVertex = null;
+	private Set<SpaceVertex> focusVertices = new HashSet<SpaceVertex>();
+	
 	private KeyListener keyListener = new KeyAdapter() {
 		public void keyPressed(KeyEvent e) {
 			switch (e.getKeyCode()) {
@@ -65,14 +73,18 @@ public class Blueprint extends javax.swing.JPanel {
 	
 	private MouseMotionListener mouseMotionListener = new MouseMotionAdapter() {
 		public void mouseMoved(MouseEvent e) {
-			
+			Point2D mouseWorld = convertToWorld(e.getPoint());
+			closestVertex = getClosestVertex(mouseWorld);
+			repaint();
 		}
 		
 		public void mouseDragged(MouseEvent e) {
+			for (SpaceVertex vertex : focusVertices) {
+			}
 			if (dragControl != null) {
 				alignPoint(e.getPoint(), dragControl);
-				repaint();
 			}
+			repaint();
 		}
 	};
 	
@@ -80,19 +92,30 @@ public class Blueprint extends javax.swing.JPanel {
 		public void mousePressed(MouseEvent e) {
 			switch (e.getButton()) {
 				case 1:
-					System.out.println("Dragging!");
+					focusVertices.add(closestVertex);
+					break;
+				case 3:
+					//System.out.println("Dragging!");
 					dragControl = convertToWorld(e.getPoint());
-					System.out.println("Control: " + dragControl);
+					//System.out.println("Control: " + dragControl);
 					break;
 			}
+			repaint();
 		}
 		
 		public void mouseReleased(MouseEvent e) {
 			switch(e.getButton()) {
 				case 1:
+					focusVertices.clear();
+					break;
+				case 3:
 					dragControl = null;
 					break;
 			}
+			repaint();
+		}
+		
+		public void mouseExited(MouseEvent e) {
 		}
 		
 		public void mouseClicked(MouseEvent e) {
@@ -197,6 +220,12 @@ public class Blueprint extends javax.swing.JPanel {
 		return point;
 	}
 	
+	private Point2D convertToScreen(Point2D world) {
+		Point2D point = new Point2D.Double();
+		currentTransform.transform(world, point);
+		return point;
+	}
+	
 	private void alignPoint(Point2D screen, Point2D world) {
 		Point2D current = new Point2D.Double();
 		try {
@@ -220,6 +249,29 @@ public class Blueprint extends javax.swing.JPanel {
 		currentTransform = transform;
 	}
 	
+	private SpaceVertex getClosestVertex(Point2D world) {
+		double lowest = Double.POSITIVE_INFINITY;
+		SpaceVertex winner = null;
+		
+		for (SpaceVertex vertex : graph.getVertices()) {
+			double distance = world.distance(convertVertex(vertex));
+			if (distance < lowest) {
+				winner = vertex;
+				lowest = distance;
+			}
+		}
+		
+		return winner;
+	}
+	
+	private Point2D convertVertex(SpaceVertex vertex) {
+		return new Point2D.Double(vertex.getLocation().getX(), vertex.getLocation().getY());
+	}
+	
+	private double roundToGrid(double v, double res) {
+		return Math.floor(v / res) * res;
+	}
+	
 	private static final Color
 		COLOR_OUTLINE = Color.black,
 		
@@ -235,13 +287,16 @@ public class Blueprint extends javax.swing.JPanel {
 	
 	// Strokes
 	private static final Stroke
-		STROKE_GRID = new BasicStroke(1.0e-3F),
+		STROKE_GRID = new BasicStroke(0.1F),
 		STROKE_BOX_LINE = new BasicStroke(1.0e-2F),
 		STROKE_BOX_RECT = new BasicStroke(1.0e-3F);
 	
 	public void paintComponent(Graphics g) {
 		Graphics2D screen = (Graphics2D) g.create();
 		Graphics2D world = (Graphics2D) g.create();
+		
+		screen.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		world.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		
 		rebuildTransform();
 		world.transform(currentTransform);
@@ -265,14 +320,16 @@ public class Blueprint extends javax.swing.JPanel {
 			screen.setStroke(new BasicStroke(0.1F));
 			screen.draw(currentTransform.createTransformedShape(line));
 		}
-	}
-	
-	private Point2D convertVertex(SpaceVertex vertex) {
-		return new Point2D.Double(vertex.getLocation().getX(), vertex.getLocation().getY());
-	}
-	
-	private double roundToGrid(double v, double res) {
-		return Math.floor(v / res) * res;
+		
+		Ellipse2D ellipse;
+		for (SpaceVertex vertex : graph.getVertices()) {
+			Point2D focus = convertToScreen(convertVertex(vertex));
+			ellipse = new Ellipse2D.Double(focus.getX() - 4, focus.getY() - 4, 8, 8);
+			screen.setColor(Color.BLUE);
+			if (focusVertices.contains(vertex)) screen.setColor(Color.GREEN);
+			else if (vertex == closestVertex) screen.setColor(Color.ORANGE);
+			screen.fill(ellipse);
+		}
 	}
 	
 	private void drawGrid(Graphics2D screen, Graphics2D world) {
@@ -294,7 +351,7 @@ public class Blueprint extends javax.swing.JPanel {
 		}
 
 		screen.setColor(COLOR_GRID_AXIS);
-
+		
 		line = new Line2D.Double(rect.getX(), 0, rect.getX() + rect.getWidth(), 0);
 		screen.draw(currentTransform.createTransformedShape(line));
 		line = new Line2D.Double(0, rect.getY(), 0, rect.getY() + rect.getHeight());
@@ -312,7 +369,7 @@ public class Blueprint extends javax.swing.JPanel {
         setLayout(null);
 
         setMinimumSize(new java.awt.Dimension(100, 100));
-        setPreferredSize(new java.awt.Dimension(320, 240));
+        setPreferredSize(new java.awt.Dimension(640, 480));
     }// </editor-fold>//GEN-END:initComponents
 	
 	
