@@ -20,7 +20,7 @@ public class WeightedEdge extends Edge {
      */
     public WeightedEdge(Vertex origin, Vertex dest, double weight){
         super(origin,dest);
-        this.weight = weight;
+        this.setWeight(weight);
         }
     
     /**
@@ -43,6 +43,13 @@ public class WeightedEdge extends Edge {
      */
     public String toString(){
         return getClass().getSimpleName()+"("+getID()+","+getOrigin().getID()+"->"+getDest().getID()+")";
+        }
+
+    /**
+     * Does what you think it does
+     */
+    public void setWeight(double weight) {
+        this.weight = weight;
         }
     
     }

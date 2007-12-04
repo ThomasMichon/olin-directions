@@ -18,7 +18,8 @@ public class SpaceEdge extends WeightedEdge {
      * @param dest The destination vertex of this edge
      */
     public SpaceEdge(SpaceVertex origin, SpaceVertex dest){
-        super(origin, dest, origin.getLocation().distanceTo(dest.getLocation()) );
+        super(origin, dest, 0 ); //does not account for weighting
+        recalculateWeight(); //updates with weighting as distance from origin to dest
         }
     
     /**
@@ -27,6 +28,14 @@ public class SpaceEdge extends WeightedEdge {
      */
     public SpaceEdge reverse(){
         return new SpaceEdge(getDest(),getOrigin());
+        }
+    
+    /**
+     * You must invoke this if you altered the location of either this.origin or this.dest
+     * So that this SpaceEdge knows its proper weight, rather than an incorrect one
+     */
+    public void recalculateWeight(){
+        setWeight( getOrigin().getLocation().distanceTo(getDest().getLocation()) );
         }
     
     /**
