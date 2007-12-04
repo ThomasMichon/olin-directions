@@ -6,6 +6,9 @@
 
 package edu.olin.maps.ui;
 
+import edu.olin.maps.graph.Path;
+import edu.olin.maps.graph.shortestpath.DijkstraSolver;
+import edu.olin.maps.graph.shortestpath.SpaceGraphSolver;
 import edu.olin.maps.graph.weighted.space.SpaceEdge;
 import edu.olin.maps.graph.weighted.space.SpaceGraph;
 import edu.olin.maps.graph.weighted.space.SpaceVertex;
@@ -52,12 +55,15 @@ public class Blueprint extends javax.swing.JPanel {
 	private Point2D gridResolution = new Point2D.Double(10.0, 10.0);
 	
 	private SpaceGraph graph = null;
+	private Path path = null;
 	
 	private boolean panning = false;
 	private Point2D dragControl = null;
 	
-	SpaceVertex closestVertex = null;
+	SpaceVertex closestVertex = null, activeVertex = null;
 	private Set<SpaceVertex> focusVertices = new HashSet<SpaceVertex>();
+	
+	private SpaceVertex origin = null, dest = null;
 	
 	private KeyListener keyListener = new KeyAdapter() {
 		public void keyPressed(KeyEvent e) {
@@ -95,7 +101,7 @@ public class Blueprint extends javax.swing.JPanel {
 			closestVertex = getClosestVertex(mouseWorld);
 			switch (e.getButton()) {
 				case 1:
-					focusVertices.add(closestVertex);
+					activeVertex = closestVertex;
 					break;
 				case 3:
 					//System.out.println("Dragging!");
@@ -111,7 +117,12 @@ public class Blueprint extends javax.swing.JPanel {
 			closestVertex = getClosestVertex(mouseWorld);
 			switch(e.getButton()) {
 				case 1:
-					focusVertices.clear();
+					if (activeVertex != null) {
+						if (origin == null) origin = activeVertex;
+						else dest = activeVertex;
+						calculatePath();
+					}
+					activeVertex = null;
 					break;
 				case 3:
 					dragControl = null;
@@ -165,6 +176,15 @@ public class Blueprint extends javax.swing.JPanel {
 		repaint();
 	}
 	
+	public Path getPath() {
+		return this.path;
+	}
+	
+	public void setPath(Path path) {
+		this.path = path;
+		repaint();
+	}
+	
 	public boolean isDrawGridEnabled() {
 		return this.drawGridEnabled;
 	}
@@ -212,6 +232,12 @@ public class Blueprint extends javax.swing.JPanel {
 		rebuildTransform();
 		alignPoint(screen, old);
 		repaint();
+	}
+	
+	private void calculatePath() {
+		if (origin == null || dest == null) return;
+		SpaceGraphSolver s = new DijkstraSolver(graph);
+		path = s.getShortestPath(origin, dest);
 	}
 	
 	private Point2D convertToWorld(Point2D screen) {
@@ -270,7 +296,7 @@ public class Blueprint extends javax.swing.JPanel {
 	}
 	
 	private SpaceVertex getClosestVertex(Point2D world) {
-		return getClosestVertex(world, Double.POSITIVE_INFINITY);
+		return getClosestVertex(world, 20 / scale);
 	}
 	
 	private Point2D convertVertex(SpaceVertex vertex) {
@@ -348,6 +374,35 @@ public class Blueprint extends javax.swing.JPanel {
 			else if (vertex == closestVertex) screen.setColor(Color.ORANGE);
 			screen.fill(ellipse);
 		}
+		
+		drawPath(screen, world);
+		drawPathTerminal(origin, screen, world);
+		drawPathTerminal(dest, screen, world);
+	}
+	
+	private void drawPath(Graphics2D screen, Graphics2D world) {
+		if (path == null) return;
+		
+		Line2D line;
+		for (SpaceEdge edge : graph.getEdges()) {
+			if (! path.getEdges().contains(edge)) continue;
+			Point2D origin = convertVertex(edge.getOrigin()), dest = convertVertex(edge.getDest());
+			line = new Line2D.Double(convertVertex(edge.getOrigin()), convertVertex(edge.getDest()));
+			if (! world.getClipBounds().intersectsLine(line)) continue;
+			screen.setPaint(new GradientPaint(convertToScreen(origin), Color.CYAN, convertToScreen(dest), Color.GREEN));
+			//screen.setColor(Color.BLACK);
+			screen.setStroke(new BasicStroke(2F));
+			screen.draw(currentTransform.createTransformedShape(line));			
+		}
+	}
+	
+	private void drawPathTerminal(SpaceVertex vertex, Graphics2D screen, Graphics2D world) {
+		if (vertex == null) return;
+		Point2D focus = convertToScreen(convertVertex(vertex));
+		Ellipse2D ellipse = new Ellipse2D.Double(focus.getX() - 7, focus.getY() - 7, 14, 14);
+		screen.setColor(Color.BLUE);
+		screen.setStroke(new BasicStroke(1F));
+		screen.draw(ellipse);
 	}
 	
 	private void drawGrid(Graphics2D screen, Graphics2D world) {

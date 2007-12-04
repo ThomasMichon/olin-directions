@@ -6,8 +6,12 @@
 
 package edu.olin.maps.ui;
 
+import edu.olin.maps.graph.Path;
 import edu.olin.maps.graph.generator.RandomGraphGenerator;
+import edu.olin.maps.graph.shortestpath.DijkstraSolver;
+import edu.olin.maps.graph.shortestpath.SpaceGraphSolver;
 import edu.olin.maps.graph.weighted.space.SpaceGraph;
+import edu.olin.maps.graph.weighted.space.SpaceVertex;
 import javax.swing.UIManager;
 
 /**
@@ -25,10 +29,15 @@ public class Navigator extends javax.swing.JFrame {
 		this.blueprint.setGraph(g);
 	}
 	
+	private void setPath(Path p) {
+		this.blueprint.setPath(p);
+	}
+	
 	private static void runNavigator() {
 		int n = 25;
 		Navigator nav = new Navigator();
 		SpaceGraph g = RandomGraphGenerator.generateRandomSpaceGraph(n, 3 * n);
+		
 		//System.out.println("Graph: " + g);
 		nav.setGraph(g);
 		nav.setVisible(true);
