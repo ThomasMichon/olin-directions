@@ -81,6 +81,51 @@ public class SpaceGraph implements WeightedGraph {
         }
     
     /**
+     * Removes SpaceVertex v from this graph
+     * Throws an error if v is null or if v is used by n>0 edges in the graph
+     * @return True if the vertex was removed; False otherwise
+     */
+    public boolean removeVertex(SpaceVertex v){
+        if(v==null){
+            throw new IllegalArgumentException("Vertices cannot be null");
+            }
+        for(SpaceEdge e: edges){
+            if(v==e.getOrigin()||v==e.getDest()){
+                throw new IllegalStateException("This vertex is in use by at least one edge in the graph; remove these edge(s) first");
+                }
+            }
+        return vertices.remove(v);
+        }
+    
+    /**
+     * Removes SpaceEdge e from this graph
+     * @return True if the edge was removed; False otherwise
+     */
+    public boolean removeEdge(SpaceEdge e){
+        if(e==null){
+            throw new IllegalArgumentException("Edges cannot be null");
+            }
+        return edges.remove(e);
+        }
+    
+    /**
+     * Removes SpaceVertex v and all edges which start at or end at e from this graph
+     * Throws an error if v is null
+     * @return True if the vertex was removed; False otherwise
+     */
+    public boolean removeVertexAndEdges(SpaceVertex v){
+        if(v==null){
+            throw new IllegalArgumentException("Vertices cannot be null");
+            }
+        for(SpaceEdge e: edges){
+            if(v==e.getOrigin()||v==e.getDest()){
+                removeEdge(e); //remove all incident edges to/from v
+                }
+            }
+        return vertices.remove(v);
+        }
+    
+    /**
      * Access the set of all the edges in this graph.<br>
      * The set which is returned <B>MUST NOT be modified</B> or this graph will be in an undefined state.
      * @return The Set of all edges in this graph
@@ -146,6 +191,20 @@ public class SpaceGraph implements WeightedGraph {
      */
     public boolean contains(Vertex v){
         return v!=null && vertices.contains(v);
+        }
+    
+    /**
+     * Recalculate all edge weights
+     * Invoke this after changing the location of a SpaceVertex in this graph
+     * After you invoke this you may need to re-calculate shortest paths,
+     * because weightings on each edge may have changed (only if you moved a vertex)
+     * 
+     */
+    public void recalculateEdgeWeights(){
+        for(SpaceEdge e: edges){
+            if(e==null){ continue; }
+            e.recalculateWeight();
+            }
         }
 
     /**
