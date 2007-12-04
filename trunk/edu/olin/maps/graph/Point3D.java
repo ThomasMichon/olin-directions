@@ -15,9 +15,9 @@ public class Point3D {
      * @param z The z-coordinate of the point
      */
     public Point3D(double x, double y, double z){
-        this.x = x;
-        this.y = y;
-        this.z = z;
+        this.setX(x);
+        this.setY(y);
+        this.setZ(z);
         }
     
     /**
@@ -82,6 +82,27 @@ public class Point3D {
      */
     public String toString(){
         return "("+x+","+y+","+z+")";
+        }
+
+    /**
+     * Does what you think it does
+     */
+    public void setX(double x) {
+        this.x = x;
+        }
+
+    /**
+     * Does what you think it does
+     */
+    public void setY(double y) {
+        this.y = y;
+        }
+
+    /**
+     * Does what you think it does
+     */
+    public void setZ(double z) {
+        this.z = z;
         }
     
     }
