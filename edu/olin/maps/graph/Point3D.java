@@ -1,5 +1,7 @@
 package edu.olin.maps.graph;
 
+import edu.olin.maps.graph.weighted.space.meta.Vector3D;
+
 /**
  * A point in 3D space
  * @author jstanton
@@ -84,6 +86,15 @@ public class Point3D {
         return "("+x+","+y+","+z+")";
         }
 
+    /**
+     * Get a Vector3D pointing to another Point3D
+     * @return a Vector3D which points from this point to the other point
+     */
+    public Vector3D vectorTo(Point3D other){
+        if(other==null||other==this){ return null; }
+        return new Vector3D(this,other);
+        }
+    
     /**
      * Does what you think it does
      */
