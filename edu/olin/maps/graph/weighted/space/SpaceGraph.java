@@ -126,6 +126,19 @@ public class SpaceGraph implements WeightedGraph {
         }
     
     /**
+     * Finds all edges which start at A and end at B, or start at B and end at A
+     */
+    public Set<SpaceEdge> getEdgesBetween(SpaceVertex a, SpaceVertex b){
+        Set<SpaceEdge> rtn = new HashSet<SpaceEdge>();
+        for(SpaceEdge e: edges){
+            if( (e.getOrigin()==a && e.getDest()==b) || (e.getOrigin()==b && e.getDest()==a) ){
+                edges.add(e);
+                }
+            }
+        return edges;
+        }
+    
+    /**
      * Access the set of all the edges in this graph.<br>
      * The set which is returned <B>MUST NOT be modified</B> or this graph will be in an undefined state.
      * @return The Set of all edges in this graph
