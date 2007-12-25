@@ -24,6 +24,10 @@ public abstract class RestrictedEdge extends SpaceEdge implements CredentialFilt
         return filter.accept(c);
         }
     
+    public void setFilter(CredentialFilter filter){
+        this.filter = filter;
+        }
+    
     /**
      * The default answer for a RestrictedEdge is to
      * never chain with another edge

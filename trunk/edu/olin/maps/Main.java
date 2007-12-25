@@ -5,6 +5,7 @@ import edu.olin.maps.graph.generator.*;
 import edu.olin.maps.graph.shortestpath.*;
 import edu.olin.maps.graph.weighted.space.*;
 import edu.olin.maps.graph.weighted.space.meta.*;
+import edu.olin.maps.loader.NavDataLoader;
 import java.awt.Desktop;
 import java.net.URI;
 import java.util.HashSet;
@@ -26,8 +27,16 @@ public class Main {
         }
     
     public static void main(String[] args){
-        metaDemo(); //options:  generalDemo(), turnDemo(), metaDemo()
-        System.exit(0);
+        parseDemo(); //options:  generalDemo(), turnDemo(), metaDemo(), uiDemo(), parseDemo()
+        //System.exit(0);
+        }
+    
+    public static void parseDemo(){
+        Object o = NavDataLoader.load();
+        }
+    
+    public static void uiDemo(){
+        edu.olin.maps.ui.Navigator.main(null);
         }
     
     public static void metaDemo(){
