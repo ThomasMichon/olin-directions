@@ -1,0 +1,1 @@
+A final project for a Discrete Mathematics course in Fall 2007 coded by Thomas Michon and Jeff Stanton.  Allows user to enter path preferences (such as avoiding stairs or going outside on a nice day) and obtain human-readable directions from start to destination.
